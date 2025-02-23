@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Android;
@@ -7,29 +6,29 @@ using UnityEngine.UI;
 
 public class Permissions : MonoBehaviour
 {
-    //El texto de la UI que indicará si los permisos han sido solicitados
+    //Texto de la interfaz que indica si los permisos de ubicación han sido otorgados o rechazados
     [SerializeField] private TextMeshProUGUI permissionFineLocation;
 
-    // Start is called before the first frame update
+    //Variable que sirve para evitar múltiples solicitudes simultáneas e indicar cuando la aplicación está solicitando los permisos
+    private bool solicitando = false; 
+
     void Start()
     {
-        //La aplicación inicia con los permisos no concedidos
+        //La aplicación inicia con la interfaz indicando que permisos no concedidos
         UpdateText("Rechazado", Color.red);
-
         PedirPermisos();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        //En caso de que el permiso haya sido otorgado, se actualiza el texto a "Otorgado"
+        //Comprueba si los permisos de ubicación han sido concedidos
         if (Permission.HasUserAuthorizedPermission(Permission.FineLocation))
         {
             UpdateText("Otorgado", Color.green);
+            solicitando = false;
         }
-
-        //En caso contrario se activa la corrutina que permitirá solicitar un nuevo permiso cada 2 segundos
-        else
+        //En caso contrario, solicita de nuevo la corrutina si no se está solicitando los permisos en ese momento
+        else if (!solicitando) 
         {
             StartCoroutine(EsperaSolicitudPermiso());
         }
@@ -38,15 +37,12 @@ public class Permissions : MonoBehaviour
     //Función que pide los permisos de ubicación al usuario al iniciar la aplicación
     void PedirPermisos()
     {
-        //En caso de que no estén concedidos, se solicita al usuario que los conceda
+        //Comprueba si los permisos han sido concedidos
         if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
         {
             Permission.RequestUserPermission(Permission.FineLocation);
-
             UpdateText("Rechazado", Color.red);
         }
-
-        //En caso de que estén concedidos, el UI de los permisos se actualiza a "Otorgado"
         else
         {
             UpdateText("Otorgado", Color.green);
@@ -56,8 +52,14 @@ public class Permissions : MonoBehaviour
     //La siguiente corrutina permite al programa solicitar los permisos de ubicación cada 2 segundos después de que el usuario responda a la solicitud del sistema
     IEnumerator EsperaSolicitudPermiso()
     {
-        yield return new WaitForSeconds(2);
-        Permission.RequestUserPermission(Permission.FineLocation);
+        solicitando = true;
+        // Espera 2 segundos antes de solicitar de nuevo los permisos de ubicación
+        yield return new WaitForSeconds(2); 
+        if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
+        {
+            Permission.RequestUserPermission(Permission.FineLocation);
+        }
+        solicitando = false;
     }
 
     //El texto de la UI se actualiza en función de la respuesta a la solicitud, alterando el contenido del texto y el color
