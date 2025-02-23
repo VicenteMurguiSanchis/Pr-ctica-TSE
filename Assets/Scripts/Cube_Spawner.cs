@@ -20,19 +20,16 @@ public class Cube_Spawner : MonoBehaviour
     //Elemento dentro de la jerarquía de la escena en el que se almacenarán todas las instancias de Cubo para que no saturen la jerarquía
     [SerializeField] private GameObject parentContainer;
 
-    //Número de cubos que se crean al pulsar el botón "Crear_Cubo"
-    [SerializeField] private int NumeroCubosCrear = 1;
-
     //Inicializa el contenido del texto que indica el número de cubos en la escena
     void Start()
     {
         text_cube.text = "Contador Cubos: " + cubeList.Count;
     }
 
-    //Añade instancias del objeto Cubo en función de la variable NumeroCubosCrear al pulsar el botón "Crear_Cubo"
-    public void SpawnCube()
+    //Añade una cantidad de instancias del objeto Cubo en función de la variable cubosCrear al pulsar el botón "Crear_Cubo"
+    public void SpawnCube(int cubosCrear)
     {
-        for(int i = 0; i < NumeroCubosCrear; i++)
+        for(int i = 0; i < cubosCrear; i++)
         {
             //Se crea la instancia del objeto mediante el objeto cube en una posición aleatoria delimitada por un rango
             GameObject c = Instantiate(cube, new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-3.5f, 5.5f), 0.0f), Quaternion.identity);
